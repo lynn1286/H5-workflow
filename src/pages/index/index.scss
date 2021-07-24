@@ -1,0 +1,18 @@
+.box {
+    background-color: $color-primary;
+    width: 200px;
+    height: 200px;
+}
+
+img {
+    width: 100px !important;
+    height: 100px;
+}
+
+.box2 {
+    width: 300px;
+    height: 100px;
+    background-color: $color-primary;
+    font-weight: 800;
+    font-size: 30px;
+}
