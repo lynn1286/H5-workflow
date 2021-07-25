@@ -27,9 +27,6 @@ module.exports = {
             '@': path.resolve(root, 'src/')
         }
     },
-    experiments: {
-        topLevelAwait: true // 开启动态 import 包
-    },
     module: {
         rules: [
             // 处理 js 文件
@@ -158,25 +155,25 @@ module.exports = {
             : []
     ),
     optimization: {
-        minimize: isProd ? true : false,
+        minimize: isProd,
         minimizer: [
             new TerserPlugin({
-                extractComments: false, //不将注释提取到单独的文件中
+                extractComments: false, // 不将注释提取到单独的文件中
                 parallel: true // 使用多进程并发运行以提高构建速度
             })
         ],
         runtimeChunk: 'single', // 将运行时代码分割成一个单独的chunk , 解决热更新警告问题
         splitChunks: {
             cacheGroups: {
-                //打包公共模块
+                // 打包公共模块
                 commons: {
-                    //initial表示提取入口文件的公共部分
+                    // initial表示提取入口文件的公共部分
                     chunks: 'initial',
-                    //表示提取公共部分最少的文件数
+                    // 表示提取公共部分最少的文件数
                     minChunks: 2,
-                    //表示提取公共部分最小的大小
+                    // 表示提取公共部分最小的大小
                     minSize: 0,
-                    //提取出来的文件命名
+                    // 提取出来的文件命名
                     name: 'commons'
                 },
                 commonsVendors: {

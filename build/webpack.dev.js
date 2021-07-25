@@ -15,7 +15,8 @@ const devWebpackConfig = merge(baseConfig, {
         hot: true,
         open: false,
         quiet: true,
-        overlay: true
+        overlay: true,
+        before: require('./../mock/index')
     }
 })
 

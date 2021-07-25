@@ -1,0 +1,13 @@
+{
+    "status": 200,
+    "msg": "请求成功",
+    "data": {
+        "userid": "@id()",
+        "username": "@cname()",
+        "date": "@date()",
+        "avatar": "@image('200x200','red','#fff','avatar')",
+        "description": "@paragraph()",
+        "ip": "@ip()",
+        "email": "@email()"
+    }
+}

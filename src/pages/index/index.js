@@ -1,12 +1,32 @@
 import './index.scss'
 import { getFile } from '@/utils/getName'
 
-// 动态 import
-const { default: _ } = await import('lodash-es');
-const element = document.createElement('div');
-element.innerHTML = _.join(['Hello', 'webpack'], ' ');
+import { join } from 'lodash-es'
+
+const element = document.createElement('div')
+element.innerHTML = join(['Hello', 'webpack'], ' ')
 
 console.log(getFile(), '--')
+
+$.ajax({
+    url: '/api/userInfo',
+    data: { name: 'jenny' },
+    type: 'get',
+    dataType: 'json',
+    success: function (data) {
+        console.log('%c 🍨 data: ', 'font-size:20px;background-color: #42b983;color:#fff;', data)
+    }
+})
+
+$.ajax({
+    url: '/userInfo',
+    data: { name: 'jenny' },
+    type: 'post',
+    dataType: 'json',
+    success: function (data) {
+        console.log('%c 🍨 data: ', 'font-size:20px;background-color: #42b983;color:#fff;', data)
+    }
+})
 
 // 测试新语法
 class Game {

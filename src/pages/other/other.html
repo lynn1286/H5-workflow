@@ -3,7 +3,16 @@
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- 
+            原理： 
+                html根节点font-size：素尺寸的计算：元素的尺寸该如何计算，比如说宽度750px的设计稿上某一个元素的宽为150px，换算成rem应该怎么算呢？
+                设计稿内部元素宽度 = 设计稿宽度/设计稿对应的html的font-size。
+                假如设计稿是750的，所以html的font-size就是750/10 = 75px，如果设计稿内某个元素是150px的宽，换算成rem就是150 / 75 = 2rem，设计稿750px得出宽度为：10rem也就是页面宽度为100%
+        -->
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover,user-scalable=no"
+        />
         <title>other</title>
     </head>
     <body></body>
