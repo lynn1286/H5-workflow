@@ -1,21 +1,14 @@
-// 热更新
-if (module.hot) {
-    module.hot.accept()
-}
-
 import './index.scss'
 import { getFile } from '@/utils/getName'
 
-import { chunk } from 'lodash-es'
-console.log(
-    '%c 🍻 debounce: ',
-    'font-size:20px;background-color: #33A5FF;color:#fff;',
-    chunk(['a', 'b', 'c', 'd'], 2),
-    getFile(),
-    '---------------------------------123123123'
-)
+// 动态 import
+const { default: _ } = await import('lodash-es');
+const element = document.createElement('div');
+element.innerHTML = _.join(['Hello', 'webpack'], ' ');
 
-// 创建没有构造函数的类属性
+console.log(getFile(), '--')
+
+// 测试新语法
 class Game {
     name = 'Violin Charades'
 }
@@ -29,3 +22,4 @@ heading.textContent = 'Interesting!'
 
 const app = document.querySelector('.index')
 app.append(heading, p)
+app.append(element)

@@ -1,3 +1,3 @@
 export const getFile = () => {
-    return 'file==='
+    return 'file'
 }

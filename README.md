@@ -1,174 +1,117 @@
-# webpack 搭建 h5 多页面
+# 基于 webpack5 构建 h5 单页面工作流
 
-新建 `build` 存放三个文件:
+如果对你有所帮助, 希望您能给我点个 `start`
 
--   webpack.base.js
--   webpack.dev.js
--   webpack.prod.js
+## 支持 scss/sass 语法
 
-使用 `webpack-merge` 插件, 将区分测试环境和生产环境, 使用方式:
+```scss
+.box {
+    background-color: $color-primary;
+    width: 200px;
+    height: 200px;
+
+    .box2 {
+        width: 300px;
+        height: 100px;
+        background-color: $color-primary;
+        font-weight: 800;
+        font-size: 30px;
+    }
+}
+```
+
+## 全局注入 sass 变量
 
 ```javascript
-const { merge } = require('webpack-merge')
-const baseConfig = require('./webpack.base')
+// 处理 scss 文件
+{
+    test: /\.s[ac]ss$/i,
+    use: [
+        isProd ? MiniCssExtractPlugin.loader : 'style-loader',
+        {
+            loader: 'css-loader',
+            options: {
+                importLoaders: 3
+            }
+        },
+        'sass-loader',
+        'postcss-loader',
+        // 全局引入 scss 文件， 未使用的 mixin function 不会被导入
+        {
+            loader: 'sass-resources-loader',
+            options: {
+                resources: [
+                    'src/styles/gobal.scss' // 引入全局 Sass 变量的文件, 这样就不需要每个 scss 文件中都 @import
+                ]
+            }
+        }
+    ]
+}
+```
 
-module.exports = merge(baseConfig, {
-    mode: 'development'
+## 自动引入全局初始化文件,例如 normalize.css/normalize.css
+
+```javascript
+import '../styles/index.scss'
+import 'normalize.css/normalize.css'
+
+console.log('测试全局自动引入公共文件')
+```
+
+实现思路就是, 将 `auto` 下的 js 文件作为入口文件经过 `webpack` 打包后作为`chunk` 通过 `html-webpack-plugin`引入到每个 `html` 中。
+
+这里是配置:
+
+```javascript
+// 入口文件对应的模板
+new HtmlWebpackPlugin({
+    template: path.resolve(root, 'src/pages/index/index.html'),
+    filename: 'index.html',
+    chunks: ['index', 'auto'], // auto
+    inject: 'body'
+})
+new HtmlWebpackPlugin({
+    template: path.resolve(root, 'src/pages/other/other.html'),
+    filename: 'other.html',
+    chunks: ['other', 'auto'], // auto
+    inject: 'body'
 })
 ```
 
-使用 `html-webpack-plugin` 动态生成 `html` 模版, 使用方式:
+## html-loader 不打包静态资源
+
+静态资源,例如 uicss 或者 ui 库、jq 等
 
 ```javascript
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-
-const root = process.cwd()
-
-module.exports = {
-    entry: {
-        index: path.resolve(root, 'src/pages/index/index.js'),
-        other: path.resolve(root, 'src/pages/other/other.js')
-    },
-    output: {
-        path: path.resolve(root, 'dist'),
-        filename: '[name].[fullhash].js',
-        clean: true
-    },
-    module: {
-        rules: []
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: path.resolve(root, 'src/pages/index/index.html'),
-            chunks: ['index']
-        }),
-
-        new HtmlWebpackPlugin({
-            filename: 'other.html',
-            template: path.resolve(root, 'src/pages/other/other.html'),
-            chunks: ['other']
-        })
-    ]
-}
-```
-
-`scss-loader`语法支持 ,使用方式:
-
-```javascript
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-
-const root = process.cwd()
-
-module.exports = {
-    entry: {
-        index: path.resolve(root, 'src/pages/index/index.js'),
-        other: path.resolve(root, 'src/pages/other/other.js')
-    },
-    output: {
-        path: path.resolve(root, 'dist'),
-        filename: '[name].[fullhash].js',
-        clean: true
-    },
-    module: {
-        rules: [
-            // 使用 scss-loader,注意 loader 是从右到左的加载执行的
-            {
-                test: /\.s[ac]ss$/i,
-                use: ['style-loader', 'css-loader', 'sass-loader']
-            }
-        ]
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: path.resolve(root, 'src/pages/index/index.html'),
-            chunks: ['index']
-        }),
-        new HtmlWebpackPlugin({
-            filename: 'other.html',
-            template: path.resolve(root, 'src/pages/other/other.html'),
-            chunks: ['other']
-        })
-    ]
-}
-```
-抽离`css`,
-
-
-
-图片的使用, `url-loader`的使用方式:
-
-```javascript
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-
-const root = process.cwd()
-
-module.exports = {
-    entry: {
-        index: path.resolve(root, 'src/pages/index/index.js'),
-        other: path.resolve(root, 'src/pages/other/other.js')
-    },
-    output: {
-        path: path.resolve(root, 'dist'),
-        filename: '[name].[fullhash].js',
-        clean: true
-    },
-    module: {
-        rules: [
-            // 使用 scss-loader,注意 loader 是从右到左的加载执行的
-            {
-                test: /\.s[ac]ss$/i,
-                use: ['style-loader', 'css-loader', 'sass-loader']
-            },
-
-            // 使用url-loader, 将项目中 scss 或者 js 中使用到的图片打包
-            {
-                test: /\.(png|jpg|gif|jpeg)$/i,
-                use: [
-                    {
-                        loader: 'url-loader',
-                        options: {
-                            // 大于 1kb 的图片 进行 base64 转换
-                            limit: 1024,
-                            // 打包后的名字保持一致，并加上hash, 后缀也保持
-                            name: 'images/[name]-[hash].[ext]'
-                        }
-                    }
-                ]
-            },
-
-            // 字体图标也是需要打包的, 同样使用 url-loader
-            {
-                test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-                loader: 'url-loader',
-                options: {
-                    limit: 20000,
-                    name: 'fonts/[name]-[hash].[ext]'
+// 处理 html 文件
+{
+    test: /\.html$/,
+    loader: 'html-loader',
+    options: {
+        minimize: false,
+        // 配置 html 不处理静态资源的引入, 如果不配置会导致打包报错,原因是将html中 引入的 link 或者 script 中的 src 处理成 hash 导致文件找不到
+        sources: {
+            list: [
+                '...', // 这个一定要配置, 否则只处理下面的类型
+                {
+                    tag: 'script',
+                    attribute: 'src',
+                    type: 'src',
+                    filter: () => false // 这里是关键， 让 html 中的 script 标签不参与打包
+                },
+                {
+                    tag: 'link',
+                    attribute: 'href',
+                    type: 'src',
+                    filter: () => false
+                },
+                {
+                    tag: 'a',
+                    attribute: 'href',
+                    type: 'src' // 如果在 html 中使用 a 标签跳转图片也要处理路径，否则不会参与打包
                 }
-            }
-        ]
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: path.resolve(root, 'src/pages/index/index.html'),
-            chunks: ['index']
-        }),
-        new HtmlWebpackPlugin({
-            filename: 'other.html',
-            template: path.resolve(root, 'src/pages/other/other.html'),
-            chunks: ['other']
-        })
-    ]
+            ]
+        }
+    }
 }
 ```
-
-
-
-<!-- 清理 `dist` 目录下的文件, `clean-webpack-plugin` 的使用: -->
-
-

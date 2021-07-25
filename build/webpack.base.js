@@ -1,29 +1,34 @@
 const path = require('path')
+const WebpackBar = require('webpackbar')
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
+const webpackEntry = require('./webpack.entry').entry()
+
 const root = process.cwd()
 
 const isProd = process.env.NODE_ENV === 'production'
 
+// 自动引入
+require('./webpack.auto').autoFile(webpackEntry)
+
 module.exports = {
-    target: 'web', // 解决热更新失效问题
-    entry: {
-        index: path.resolve(root, 'src/pages/index/index.js'),
-        other: path.resolve(root, 'src/pages/other/other.js'),
-        auto: path.resolve(root, 'src/auto/index.js')
-    },
+    target: isProd ? 'browserslist' : 'web', // 解决热更新失效问题
+    entry: webpackEntry.entry,
     output: {
         path: path.resolve(root, 'dist'),
         filename: 'js/[name]/[name].[hash].js',
-        clean: isProd ? true : false
+        clean: true
     },
     resolve: {
         extensions: ['.js', '.jsx', '.json', 'scss', 'css'], // 引入文件时可以省略后缀名称
         alias: {
             '@': path.resolve(root, 'src/')
         }
+    },
+    experiments: {
+        topLevelAwait: true // 开启动态 import 包
     },
     module: {
         rules: [
@@ -124,23 +129,23 @@ module.exports = {
         ]
     },
     plugins: [
-        // 入口文件对应的模板
-        new HtmlWebpackPlugin({
-            template: path.resolve(root, 'src/pages/index/index.html'),
-            filename: 'index.html',
-            chunks: ['index', 'auto'],
-            inject: 'body'
-        }),
-        new HtmlWebpackPlugin({
-            template: path.resolve(root, 'src/pages/other/other.html'),
-            filename: 'other.html',
-            chunks: ['other', 'auto'],
-            inject: 'body'
-        }),
+        ...webpackEntry.htmlTmplater, // html 模版
 
         // 复制静态资源库 一般都是些不需要参与打包的文件， 例如 第三方 ui 库 或者 jquery 包、 uicss 等
         new CopyPlugin({
             patterns: [{ from: path.resolve(root, 'static'), to: 'static' }]
+        }),
+
+        // 打包进度条
+        new WebpackBar({
+            name: '正在进行打包',
+            color: '#ff5777'
+        }),
+
+        // 优化控制台信息
+        new FriendlyErrorsWebpackPlugin({
+            // 是否每次都清空控制台
+            clearConsole: true
         })
     ].concat(
         isProd
@@ -153,20 +158,30 @@ module.exports = {
             : []
     ),
     optimization: {
-        minimize: true,
+        minimize: isProd ? true : false,
         minimizer: [
             new TerserPlugin({
-                extractComments: false //不将注释提取到单独的文件中
+                extractComments: false, //不将注释提取到单独的文件中
+                parallel: true // 使用多进程并发运行以提高构建速度
             })
         ],
         runtimeChunk: 'single', // 将运行时代码分割成一个单独的chunk , 解决热更新警告问题
         splitChunks: {
-            chunks: 'all',
-            // 提取第三方库, 因为它们一般不会变化
             cacheGroups: {
-                vendor: {
+                //打包公共模块
+                commons: {
+                    //initial表示提取入口文件的公共部分
+                    chunks: 'initial',
+                    //表示提取公共部分最少的文件数
+                    minChunks: 2,
+                    //表示提取公共部分最小的大小
+                    minSize: 0,
+                    //提取出来的文件命名
+                    name: 'commons'
+                },
+                commonsVendors: {
                     test: /[\\/]node_modules[\\/]/,
-                    name: 'common-libs',
+                    name: 'vendors',
                     chunks: 'all'
                 }
             }

@@ -11,9 +11,11 @@ const devWebpackConfig = merge(baseConfig, {
     devServer: {
         contentBase: path.resolve(root, 'dist'),
         compress: true,
-        hotOnly: true,
         watchContentBase: true,
-        open: false
+        hot: true,
+        open: false,
+        quiet: true,
+        overlay: true
     }
 })
 
