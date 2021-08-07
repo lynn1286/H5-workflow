@@ -1,10 +1,10 @@
 import './index.scss'
 import { getFile } from '@/utils/getName'
 
-import { join } from 'lodash-es'
+import _ from 'lodash-es'
 
 const element = document.createElement('div')
-element.innerHTML = join(['Hello', 'webpack'], ' ')
+element.innerHTML = _.join(['Hello', 'webpack'], ' ')
 
 console.log(getFile(), '--')
 
@@ -15,6 +15,9 @@ $.ajax({
     dataType: 'json',
     success: function (data) {
         console.log('%c 🍨 data: ', 'font-size:20px;background-color: #42b983;color:#fff;', data)
+    },
+    error: function (err) {
+        console.log('%c 🍌 err: ', 'font-size:20px;background-color: #EA7E5C;color:#fff;', err)
     }
 })
 

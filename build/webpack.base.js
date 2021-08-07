@@ -3,12 +3,20 @@ const WebpackBar = require('webpackbar')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
-const TerserPlugin = require('terser-webpack-plugin')
 const webpackEntry = require('./webpack.entry').entry()
 
 const root = process.cwd()
 
 const isProd = process.env.NODE_ENV === 'production'
+
+const minicss = [
+    // 合并文件内css
+    new MiniCssExtractPlugin({
+        filename: 'css/[name]/[name].[hash].css'
+    })
+]
+
+const MiniCss = isProd ? minicss : []
 
 // 自动引入
 require('./webpack.auto').autoFile(webpackEntry)
@@ -144,44 +152,5 @@ module.exports = {
             // 是否每次都清空控制台
             clearConsole: true
         })
-    ].concat(
-        isProd
-            ? [
-                  // 合并文件内css
-                  new MiniCssExtractPlugin({
-                      filename: 'css/[name]/[name].[hash].css'
-                  })
-              ]
-            : []
-    ),
-    optimization: {
-        minimize: isProd,
-        minimizer: [
-            new TerserPlugin({
-                extractComments: false, // 不将注释提取到单独的文件中
-                parallel: true // 使用多进程并发运行以提高构建速度
-            })
-        ],
-        runtimeChunk: 'single', // 将运行时代码分割成一个单独的chunk , 解决热更新警告问题
-        splitChunks: {
-            cacheGroups: {
-                // 打包公共模块
-                commons: {
-                    // initial表示提取入口文件的公共部分
-                    chunks: 'initial',
-                    // 表示提取公共部分最少的文件数
-                    minChunks: 2,
-                    // 表示提取公共部分最小的大小
-                    minSize: 0,
-                    // 提取出来的文件命名
-                    name: 'commons'
-                },
-                commonsVendors: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: 'vendors',
-                    chunks: 'all'
-                }
-            }
-        }
-    }
+    ].concat(MiniCss)
 }
