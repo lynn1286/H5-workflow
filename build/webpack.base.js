@@ -12,7 +12,7 @@ const isProd = process.env.NODE_ENV === 'production'
 const minicss = [
     // 合并文件内css
     new MiniCssExtractPlugin({
-        filename: 'css/[name]/[name].[hash].css'
+        filename: 'css/[name]/[name].[contenthash].css'
     })
 ]
 
@@ -26,7 +26,7 @@ module.exports = {
     entry: webpackEntry.entry,
     output: {
         path: path.resolve(root, 'dist'),
-        filename: 'js/[name]/[name].[hash].js',
+        filename: 'js/[name]/[name].[chunkhash].js',
         clean: true
     },
     resolve: {
@@ -152,5 +152,8 @@ module.exports = {
             // 是否每次都清空控制台
             clearConsole: true
         })
-    ].concat(MiniCss)
+    ].concat(MiniCss),
+    performance: {
+        hints: false
+    }
 }

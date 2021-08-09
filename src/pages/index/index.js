@@ -6,7 +6,7 @@ import _ from 'lodash-es'
 const element = document.createElement('div')
 element.innerHTML = _.join(['Hello', 'webpack'], ' ')
 
-console.log(getFile(), '--')
+console.log(getFile(), '------------123 ----------')
 
 $.ajax({
     url: '/api/userInfo',

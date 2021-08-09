@@ -4,9 +4,9 @@
     "description": "",
     "main": "",
     "scripts": {
-        "dev": "webpack serve --config build/webpack.dev.js --node-env development --progress",
-        "build:dev": "webpack  --config build/webpack.dev.js --node-env development --progress",
-        "build": "webpack --config build/webpack.prod.js --node-env production --progress",
+        "dev": "webpack serve --config build/webpack.dev.js --node-env development",
+        "build:dev": "webpack  --config build/webpack.dev.js --node-env development",
+        "build": "webpack --config build/webpack.prod.js --node-env production",
         "lint": "eslint --fix src/**/*.js"
     },
     "keywords": [],
